@@ -1,0 +1,41 @@
+name: Build & Deploy OCC
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install frontend deps
+        run: npm install
+      
+      - name: Build frontend
+        run: npm run build
+      
+      - name: Install backend deps
+        run: cd server && npm install
+      
+      - name: Verify build output
+        run: |
+          echo "=== Frontend Build ===" && ls -la dist/
+          echo "=== Server Build ===" && ls -la server/
+      
+      - name: Deploy to ops.bkelogistics.com
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          echo "Build complete. Ready for manual deployment."
+          echo "Artifacts: dist/ (frontend), server/ (backend)"
+          # SSH deploy would go here once credentials are configured
