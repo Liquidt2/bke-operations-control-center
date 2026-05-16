@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import Dashboard from './pages/Dashboard'
+import OrgChart from './pages/OrgChart'
+import Kanban from './pages/Kanban'
+import TeamChat from './pages/TeamChat'
 
 const PAGES = {
   dashboard: 'Dashboard',
@@ -13,8 +17,12 @@ const PAGES = {
 
 export default function App() {
   const [page, setPage] = useState('dashboard')
-  const [apiUrl] = useState('/api')
-  
+  const [token] = useState(() => localStorage.getItem('occ_token') || 'dev-token')
+  const [apiUrl] = useState(() => {
+    const base = import.meta.env.VITE_API_URL || window.location.origin
+    return base + '/api'
+  })
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       {/* Sidebar */}
@@ -52,47 +60,21 @@ export default function App() {
           ))}
         </nav>
       </aside>
-      
+
       {/* Main Content */}
       <main style={{ flex: 1, padding: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 24 }}>{PAGES[page]}</h1>
         <div style={{ color: 'var(--text-muted)' }}>
-          {page === 'dashboard' && <Dashboard apiUrl={apiUrl} />}
-          {page === 'org' && <div>Org Chart - loading...</div>}
-          {page === 'tickets' && <div>Tickets - loading...</div>}
-          {page === 'chat' && <div>Team Chat - loading...</div>}
+          {page === 'dashboard' && <Dashboard apiUrl={apiUrl} token={token} />}
+          {page === 'org' && <OrgChart apiUrl={apiUrl} token={token} />}
+          {page === 'tickets' && <Kanban apiUrl={apiUrl} token={token} />}
+          {page === 'chat' && <TeamChat apiUrl={apiUrl} token={token} />}
           {page === 'settings' && <div>Settings - loading...</div>}
           {page === 'costs' && <div>Costs - loading...</div>}
           {page === 'hiring' && <div>Hiring - loading...</div>}
           {page === 'projects' && <div>Projects - loading...</div>}
         </div>
       </main>
-    </div>
-  )
-}
-
-function Dashboard({ apiUrl }) {
-  const [stats, setStats] = useState({ agents: 0, tickets: 0, spend: 0 })
-  
-  useEffect(() => {
-    // Placeholder - will be filled in later
-    setStats({ agents: 13, tickets: 0, spend: 0 })
-  }, [])
-  
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
-      <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 24, border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Active Agents</div>
-        <div style={{ fontSize: 36, fontWeight: 700, color: 'var(--cyan)' }}>{stats.agents}</div>
-      </div>
-      <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 24, border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Open Tickets</div>
-        <div style={{ fontSize: 36, fontWeight: 700, color: 'var(--amber)' }}>{stats.tickets}</div>
-      </div>
-      <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: 24, border: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Monthly Spend</div>
-        <div style={{ fontSize: 36, fontWeight: 700, color: 'var(--green)' }}>${(stats.spend/100).toFixed(2)}</div>
-      </div>
     </div>
   )
 }
